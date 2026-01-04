@@ -9,33 +9,51 @@ def forecast_10_days(
     df10,
     features
 ):
-    last_row = df_feat.iloc[-1].copy()
+    """
+    Iterative 10-day AQI forecast (AUTO-REGRESSIVE)
+    """
 
-    # 🔁 FEATURE NAME ALIASING (CRITICAL FIX)
-    rename_map = {
-        "pm25_lag1": "pm2.5_lag1",
-        "pm25_lag2": "pm2.5_lag2",
-        "pm25_lag3": "pm2.5_lag3",
-        "pm25_roll7": "pm2.5_roll7",
-    }
+    forecasts = []
 
-    last_row.rename(index=rename_map, inplace=True)
+    # Start from last known row
+    current = df_feat.iloc[-1].copy()
+    current_date = pd.to_datetime(current["date"])
 
-    X = pd.DataFrame([last_row[features]])
+    for _ in range(10):
+        X = pd.DataFrame([[current[f] for f in features]], columns=features)
 
-    preds = []
-    last_date = df_feat["date"].iloc[-1]
+        # Predict PM values
+        pm25_pred = float(rf_pm25.predict(X)[0])
+        pm10_pred = float(rf_pm10.predict(X)[0])
 
-    for i in range(10):
-        pm25_pred = rf_pm25.predict(X)[0]
-        pm10_pred = rf_pm10.predict(X)[0]
-
-        preds.append({
-            "date": str(last_date + timedelta(days=i + 1)),
-            "pm25": float(pm25_pred),
-            "pm10": float(pm10_pred),
-            "AQI": float(max(pm25_pred, pm10_pred)),
+        # Store result
+        forecasts.append({
+            "date": (current_date + timedelta(days=1)).strftime("%Y-%m-%d"),
+            "pm2.5": pm25_pred,
+            "pm10": pm10_pred,
+            "AQI": max(pm25_pred, pm10_pred),
             "type": "forecast"
         })
 
-    return pd.DataFrame(preds)
+        # 🔁 UPDATE LAGS (CRITICAL)
+        current["pm2.5_lag3"] = current["pm2.5_lag2"]
+        current["pm2.5_lag2"] = current["pm2.5_lag1"]
+        current["pm2.5_lag1"] = pm25_pred
+
+        current["pm10_lag3"] = current["pm10_lag2"]
+        current["pm10_lag2"] = current["pm10_lag1"]
+        current["pm10_lag1"] = pm10_pred
+
+        # Update rolling means (approximate)
+        current["pm2.5_roll7"] = (
+            current["pm2.5_roll7"] * 6 + pm25_pred
+        ) / 7
+
+        current["pm10_roll7"] = (
+            current["pm10_roll7"] * 6 + pm10_pred
+        ) / 7
+
+        # Move date forward
+        current_date += timedelta(days=1)
+
+    return pd.DataFrame(forecasts)
