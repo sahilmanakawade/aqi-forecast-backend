@@ -1,13 +1,19 @@
-def aqi(c, dfp):
-    row = dfp[(dfp["BPhi"] > c) & (dfp["BPlo"] <= c)]
-    if row.empty:
-        return None
-
-    Ihi, Ilo = row["Ihi"].iloc[0], row["Ilo"].iloc[0]
-    BPhi, BPlo = row["BPhi"].iloc[0], row["BPlo"].iloc[0]
-
-    return ((Ihi - Ilo) / (BPhi - BPlo)) * (c - BPlo) + Ilo
-
+def aqi25(a,aqi_data):
+    row=aqi_data[(aqi_data["bplo2.5"] <= a) & (aqi_data["bphi2.5"] >= a)]
+    ihi=aqi_data["ihi"].iloc[0]
+    ilo=aqi_data["ilo"].iloc[0]
+    bphi2_5=aqi_data["bphi2.5"].iloc[0]
+    bplo2_5=aqi_data["bplo2.5"].iloc[0]
+    aqi2_5=((ihi - ilo) / (bphi2_5 - bplo2_5)) * (a - bplo2_5) + ilo
+    return aqi2_5
+def aqi10(a,aqi_data):
+    row=aqi_data[(aqi_data["bplopm10"] <= a) & (aqi_data["bphipm10"] >= a)]
+    ihi=aqi_data["ihi"].iloc[0]
+    ilo=aqi_data["ilo"].iloc[0]
+    bphi10=aqi_data["bphipm10"].iloc[0]
+    bplo10=aqi_data["bplopm10"].iloc[0]
+    aqi10=((ihi - ilo) / (bphi10 - bplo10)) * (a - bplo10) + ilo
+    return aqi10
 
 def compute_today_aqi(df, df2_5, df10):
     if df is None or df.empty:
