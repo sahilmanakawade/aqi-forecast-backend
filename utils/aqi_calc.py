@@ -32,14 +32,6 @@ def aqi25(a,aqi_data):
     ilo=row["ilo"]
     bphi2_5=row["bphi2.5"]
     bplo2_5=row["bplo2.5"]
-
-def aqi25(a,aqi_data):
-    row=aqi_data[(aqi_data["bplo2.5"] <= a) & (aqi_data["bphi2.5"] >= a)]
-    ihi=aqi_data["ihi"].iloc[0]
-    ilo=aqi_data["ilo"].iloc[0]
-    bphi2_5=aqi_data["bphi2.5"].iloc[0]
-    bplo2_5=aqi_data["bplo2.5"].iloc[0]
-
     aqi2_5=((ihi - ilo) / (bphi2_5 - bplo2_5)) * (a - bplo2_5) + ilo
     return aqi2_5
 def aqi10(a,aqi_data):
@@ -64,22 +56,8 @@ def compute_today_aqi(lat: float, lon: float):
     ).json()
 
     df1 = pd.DataFrame([i["components"] for i in data["list"]])
-
-    if df1.empty:
-
-    ihi=aqi_data["ihi"].iloc[0]
-    ilo=aqi_data["ilo"].iloc[0]
-    bphi10=aqi_data["bphipm10"].iloc[0]
-    bplo10=aqi_data["bplopm10"].iloc[0]
-    aqi10=((ihi - ilo) / (bphi10 - bplo10)) * (a - bplo10) + ilo
-    return aqi10
-
-def compute_today_aqi(df, df2_5, df10):
-    if df is None or df.empty:
-
+    if df1 is None or df1.empty:
         return None
-
-
     last = df1.iloc[-1]
 
     pm25 = last["pm2_5"]
@@ -91,7 +69,6 @@ def compute_today_aqi(df, df2_5, df10):
     final_aqi = max(
         v for v in [aqi25_val, aqi10_val] if v is not None
     )
-
     return {
         "pm25": float(pm25),
         "pm10": float(pm10),
@@ -99,3 +76,4 @@ def compute_today_aqi(df, df2_5, df10):
         "type": "observed",
     }
 
+print(compute_today_aqi(19.076090,72.877426))
