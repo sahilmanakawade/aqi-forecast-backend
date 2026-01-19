@@ -1,7 +1,7 @@
 import requests
 import numpy as np
 import pandas as pd
-from datetime import datetime,timedelta
+from datetime import datetime,timedelta,UTC
 import warnings
 warnings.simplefilter("ignore")
 aqi_data={
@@ -48,12 +48,15 @@ def aqi10(a,aqi_data):
     return aqi10
 def compute_today_aqi(lat: float, lon: float):
     api_key = "bcf183f11bc94a8ec008ab3d4049ae88"
-    url_current = "http://api.openweathermap.org/data/2.5/air_pollution"
-
+    url_current = "https://api.openweathermap.org/data/2.5/air_pollution/history"
     data = requests.get(
         url_current,
-        params={"lat": lat, "lon": lon, "appid": api_key}
-    ).json()
+        param1={"lat":18.9582,
+                "lon":72.8321,
+                "start":int((datetime.now()-timedelta(days=1)).timestamp()),
+                "end":int((datetime.now()).timestamp()),
+                "appid":api_key
+               }).json()
 
     df1 = pd.DataFrame([i["components"] for i in data["list"]])
     if df1 is None or df1.empty:
@@ -77,3 +80,4 @@ def compute_today_aqi(lat: float, lon: float):
     }
 
 print(compute_today_aqi(19.076090,72.877426))
+
