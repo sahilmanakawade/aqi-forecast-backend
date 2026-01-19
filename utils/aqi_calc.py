@@ -51,8 +51,8 @@ def compute_today_aqi(lat: float, lon: float):
     url_current = "https://api.openweathermap.org/data/2.5/air_pollution/history"
     data = requests.get(
         url_current,
-        params={"lat":18.9582,
-                "lon":72.8321,
+        params={"lat":lat,
+                "lon":lon,
                 "start":int((datetime.now()-timedelta(days=1)).timestamp()),
                 "end":int((datetime.now()).timestamp()),
                 "appid":api_key
@@ -80,5 +80,6 @@ def compute_today_aqi(lat: float, lon: float):
     }
 
 print(compute_today_aqi(19.076090,72.877426))
+
 
 
