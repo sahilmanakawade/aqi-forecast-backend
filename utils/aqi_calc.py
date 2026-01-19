@@ -5,7 +5,7 @@ from datetime import datetime,timedelta,UTC
 import warnings
 warnings.simplefilter("ignore")
 aqi_data={
-    "ihi":[50,100,200,300,400,500,600],
+    "ihi":[50,100,200,300,400,500,700],
     "ilo":[0,51,101,201,301,401,501],
     "bphi2.5":[30,60,90,120,250,550,1000],
     "bplo2.5":[0,31,61,91,121,251,551],
@@ -80,6 +80,7 @@ def compute_today_aqi(lat: float, lon: float):
     }
 
 print(compute_today_aqi(19.076090,72.877426))
+
 
 
 
